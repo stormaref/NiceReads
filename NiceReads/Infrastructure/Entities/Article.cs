@@ -3,6 +3,13 @@ namespace NiceReads.Infrastructure.Entities
 {
 	public class Article : BaseEntity
 	{
+        public Article(string title, string body, Guid userId)
+        {
+            Title = title;
+            Body = body;
+            UserId = userId;
+        }
+
         public string Title { get; set; }
         public string Body { get; set; }
         public Guid UserId { get; set; }

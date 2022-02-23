@@ -4,29 +4,24 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using NiceReads.Infrastructure.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore.Design;
+using System.Reflection;
 
 namespace NiceReads.Infrastructure.Persistence
 {
     public class DatabaseContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>
     {
-        public DatabaseContext(DbContextOptions options) : base(options)
+        public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options)
         {
         }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        protected override void OnModelCreating(ModelBuilder builder)
         {
-            if (!optionsBuilder.IsConfigured)
-            {
-                optionsBuilder.UseInMemoryDatabase("InMemory");
-            }
-            base.OnConfiguring(optionsBuilder);
+            builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+
+            base.OnModelCreating(builder);
         }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-
-            base.OnModelCreating(modelBuilder);
-        }
+        public DbSet<Article> Articles { get; set; }
     }
 
     public class DatabaseContextFactory : IDesignTimeDbContextFactory<DatabaseContext>

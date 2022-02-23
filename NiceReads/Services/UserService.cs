@@ -64,6 +64,7 @@ namespace NiceReads.Services
             var claims = new[]
             {
                 new Claim(ClaimTypes.Name, user.Name()),
+                new Claim("UserId", user.Id.ToString()),
                 new Claim(ClaimTypes.NameIdentifier,Guid.NewGuid().ToString())
              };
 
