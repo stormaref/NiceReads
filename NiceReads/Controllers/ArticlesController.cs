@@ -26,7 +26,10 @@ namespace NiceReads.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Article>> GetArticle(Guid id)
         {
-            var article = await _context.Articles.Include(a => a.User).SingleOrDefaultAsync(a => a.Id == id);
+            var article = await _context.Articles
+                .Include(a => a.Author)
+                .Include(a => a.Category)
+                .SingleOrDefaultAsync(a => a.Id == id);
 
             if (article == null)
             {
@@ -34,6 +37,26 @@ namespace NiceReads.Controllers
             }
 
             return article;
+        }
+
+        [HttpGet("category/{id}")]
+        public async Task<ActionResult<List<Article>>> GetArticlesByCategory(Guid categoryId)
+        {
+            var articles = await _context.Articles
+                .Include(a => a.Category)
+                .Where(a => a.CategoryId == categoryId)
+                .ToListAsync();
+
+            return Ok(articles);
+        }
+
+        [HttpGet("categories")]
+        public async Task<ActionResult<List<Category>>> GetCategories()
+        {
+            var categories = await _context.Categories
+                .ToListAsync();
+
+            return Ok(categories);
         }
 
         [HttpPut("{id}")]
@@ -48,9 +71,18 @@ namespace NiceReads.Controllers
                 return NotFound();
             }
 
+            var category = await _context.Categories
+                .FindAsync(request.CategoryId);
+
+            if (category is null)
+            {
+                return NotFound("Category not found");
+            }
+
             article.Body = request.Body;
             article.Title = request.Title;
-            article.UserId = Guid.Parse(HttpContext.User.Claims.First(c => c.Type == "UserId").Value);
+            article.AuthorId = Guid.Parse(HttpContext.User.Claims.First(c => c.Type == "UserId").Value);
+            article.CategoryId = request.CategoryId;
 
             try
             {
@@ -75,12 +107,21 @@ namespace NiceReads.Controllers
         {
             public string Title { get; set; }
             public string Body { get; set; }
+            public Guid CategoryId { get; set; }
         }
 
         [HttpPost]
         [Authorize]
         public async Task<ActionResult<Article>> PostArticle(PostArticleRequest request)
         {
+            var category = await _context.Categories
+                .FindAsync(request.CategoryId);
+
+            if (category is null)
+            {
+                return NotFound("Category not found");
+            }
+
             var userId = Guid.Parse(HttpContext.User.Claims.First(c => c.Type == "UserId").Value);
             var article = new Article(request.Title, request.Body, userId);
             _context.Articles.Add(article);

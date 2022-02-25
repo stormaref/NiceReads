@@ -7,13 +7,17 @@ namespace NiceReads.Infrastructure.Entities
         {
             Title = title;
             Body = body;
-            UserId = userId;
+            AuthorId = userId;
         }
 
         public string Title { get; set; }
         public string Body { get; set; }
-        public Guid UserId { get; set; }
-        public virtual ApplicationUser User { get; set; }
+
+        public Guid AuthorId { get; set; }
+        public virtual ApplicationUser Author { get; set; }
+
+        public Guid CategoryId { get; set; }
+        public virtual Category Category { get; set; }
     }
 }
 

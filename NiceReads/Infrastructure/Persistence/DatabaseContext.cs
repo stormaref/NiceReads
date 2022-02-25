@@ -18,10 +18,21 @@ namespace NiceReads.Infrastructure.Persistence
         {
             builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
+            builder.Entity<Article>()
+                .HasOne(a => a.Author)
+                .WithMany()
+                .HasForeignKey(a => a.AuthorId);
+
+            builder.Entity<Article>()
+                .HasOne(a => a.Category)
+                .WithMany()
+                .HasForeignKey(a => a.CategoryId);
+
             base.OnModelCreating(builder);
         }
 
         public DbSet<Article> Articles { get; set; }
+        public DbSet<Category> Categories { get; set; }
     }
 
     public class DatabaseContextFactory : IDesignTimeDbContextFactory<DatabaseContext>
